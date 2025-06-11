@@ -1,5 +1,11 @@
-
 import java.util.Scanner;
+import org.jsoup.Jsoup;
+import org.jsoup.Connection;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import java.io.IOException;
+import java.util.Map;
 
 public class Final {
     public static void main(String[] args) {
@@ -9,24 +15,37 @@ public class Final {
         System.out.print("비밀번호: ");
         String pw = sc.nextLine();
 
-        String[] Courses = {" JAVA프로그래밍", "데이터통신"};
-        System.out.println("\n=== 수강과목 목록 ===");
-        for(String course : Courses) {
-            System.out.println("\n▶ " + course);
-            printNotices();
-            printAssignments();
+        try {
+            Connection.Response loginResponse = Jsoup.connect("https://hive.cju.ac.kr/common/login/loginpage.do")
+                    .method(Connection.Method.GET)
+                    .execute();
+
+            Map<String, String> cookies = loginResponse.cookies();
+
+
+            Document noticePage = Jsoup.connect("https://hive.cju.ac.kr/usr/classroom/course/bbs/notice/list.do")
+                    .cookies(cookies)
+                    .get();
+
+            System.out.println("\n=== 수강과목 공지사항 ===");
+            parseNotices(noticePage);
+
+        } catch (IOException e) {
+            System.out.println("정보 조회 중 오류 발생: " + e.getMessage());
         }
     }
 
-    private static void printNotices() {
-        System.out.println("[공지사항]");
-        System.out.println("- 06/13: 기말고사 일정 안내");
-        System.out.println("- 06/23: 보강수업 공지");
-    }
 
-    private static void printAssignments() {
-        System.out.println("[과제]");
-        System.out.println("- 과제 4 제출 (마감: 06/12)");
-        System.out.println("- 개인발표 문서 제출 (마감: 06/10)");
+
+    private static void parseNotices(Document doc) {
+        Elements noticeList = doc.select("table.board-list > tbody > tr");
+
+        for (Element notice : noticeList) {
+            String title = notice.select("td.title > a").text();
+            String date = notice.select("td.date").text();
+
+            System.out.println("\n▶ " + title);
+            System.out.println("  - 등록일: " + date);
+        }
     }
 }
