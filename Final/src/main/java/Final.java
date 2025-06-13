@@ -22,6 +22,20 @@ public class Final {
             "https://www.cju.ac.kr/www/selectTnRstrntMenuListU.do?sc1=employee&key=5119&"
     };
 
+    private static final String[] mainToDorm = {
+            "08:10","08:30","08:50","09:10","09:30",
+            "10:10","10:30","11:10","11:40","12:20",
+            "13:00","13:40","14:20","15:00","15:40",
+            "16:20","16:40","17:20","17:40"
+    };
+
+    private static final String[] dormToMain = {
+            "08:20","08:40","09:00","09:20","09:40",
+            "10:20","10:40","11:20","11:40","12:40",
+            "13:20","14:00","14:40","15:20","16:00",
+            "16:40","17:00","17:40","18:00"
+    };
+
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
 
@@ -39,14 +53,13 @@ public class Final {
                     openMeal(sc);
                     break;
                 case 2:
-                    bus();
+                    nextBus();
                     break;
                 case 3:
                     System.out.println("이용해주셔서 감사합니다!");
                     return;
                 default:
                     System.out.println("잘못된 선택입니다. 다시 시도해주세요.");
-
             }
         }
     }
@@ -67,17 +80,25 @@ public class Final {
         }
     }
 
-    private static void bus() {
+    private static void nextBus() {
+        LocalTime now = LocalTime.now();
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("HH:mm");
+        System.out.println("\n현재 시각: " + now.format(fmt));
 
-        String[] mainToDorm = {"08:10","08:30","08:50","09:10","09:30","10:10","10:30","11:10","11:40","12:20","13:00","13:40","14:20","15:00","15:40","16:20","16:40","17:20","17:40"};
-        String[] dormToMain = {"08:20","08:40","09:00","09:20","09:40","10:20","10:40","11:20","11:40","12:40","13:20","14:00","14:40","15:20","16:00","16:40","17:00","17:40","18:00"};
-        System.out.println("\n[정문 → 생활관]");
-        for (String t : mainToDorm) System.out.print(t + "  ");
-        System.out.println("\n\n[생활관 → 정문]");
-        for (String t : dormToMain) System.out.print(t + "  ");
+        System.out.println("\n정문 → 생활관");
+        System.out.println("다음 버스: " + nextTime(now, mainToDorm));
 
+        System.out.println("\n생활관 → 정문");
+        System.out.println("다음 버스: " + nextTime(now, dormToMain));
 
         System.out.println("\n※ 화·수·목 09:00~11:00에는 버스 1대만 운행");
         System.out.println("※ 만차 시 무정차(경적 2회)하니 주의하세요!");
+    }
+
+    private static String nextTime(LocalTime now, String[] table) {
+        for (String t : table) {
+            if (LocalTime.parse(t).isAfter(now)) return t;
+        }
+        return "오늘 운행 종료";
     }
 }
